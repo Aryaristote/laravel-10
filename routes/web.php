@@ -1,34 +1,26 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+use Laravel\Socialite\Facades\Socialite;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Profile\AvatarController;
 
 Route::get('/', function () {
-    // return view('welcome');
-    $users = DB::table('users')->get(); //Select all Users
+    return view('welcome');
+    // $users = User::get(); //Get all Users
 
     // Insert new users
-    // $user = DB::table('users')->insert([ 'name'=> 'Kalume', 'email'=> 'Kalume05@gmail.com', 'password'=> '12345678' ]);
+    // $user = User::create([ 'name'=> 'Kalume', 'email'=> 'Kalume06@gmail.com', 'password'=> '12345678' ]);
 
     //Update users
-    $user = DB::table('users')->where('id', 2)->update([ 'email' => 'abc@update.com']);
-    // $users = DB::update("update users set email = ? where id = ?", ['abc@updated.com', 2]);
+    // $user = User::find(2); //First find the user u want to update, then update it,
+    // $user->update([ 'email' => 'abcd@update.com', 'password' => bcrypt('password')]); //Then update that value in user,
 
     //Delet user
-    // $users = DB::delete('delete from users where id = 2');
-    dd($users);
+    // $user = User::find(1); //First find the user to delete,
+    // $user->delete(); //Then delete it,
 });
 
 Route::get('/dashboard', function () {
@@ -38,7 +30,18 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/update', [AvatarController::class, 'update'])->name('profile.avatar');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 require __DIR__.'/auth.php';
+
+// Social Auth
+Route::get('/auth/redirect', function () {
+    return Socialite::driver('github')->redirect();
+});
+
+Route::get('/auth/callback', function () {
+    $user = Socialite::driver('github')->user();
+    dd($user);
+});
