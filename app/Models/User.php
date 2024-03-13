@@ -52,4 +52,10 @@ class User extends Authenticatable
             set: fn ($value)=> bcrypt($value)
         );
     }
+
+    //Check if the logged in user is an admin
+    public function isAdmin(): bool {
+        $admins = ['Aryaristote@gmail.com'];
+        return in_array($this->email, $admins);
+    }
 }

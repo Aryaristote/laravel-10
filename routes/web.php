@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Profile\AvatarController;
+use App\Http\Controllers\TicketController;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('welcome');
@@ -37,11 +40,22 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 // Social Auth
-Route::get('/auth/redirect', function () {
+Route::post('/auth/redirect', function () {
     return Socialite::driver('github')->redirect();
-});
+})->name('login.github');
 
 Route::get('/auth/callback', function () {
     $user = Socialite::driver('github')->user();
-    dd($user);
+    $user = User::firstOrCreate(['email' => $user->email], [
+        'name' => $user->name,
+        'password' => 'Kalume@21'
+    ]);
+    Auth::login($user);
+    return redirect('/dashboard');
+});
+
+//Make the router only accessblee if the user is logged in
+Route::middleware('auth')->group(function () {
+    // Rooute::resource will autocreate: class for create, index, update, delete, id/item
+    Route::resource('/ticket', TicketController::class);
 });
